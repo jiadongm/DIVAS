@@ -217,30 +217,18 @@ MatSignalExtractJP <- function(
   phiBar <- quantile(PCAnglesCacheFullBoot[, rBar], 0.95)
   psiBar <- quantile(PCAnglesCacheFullBootLoad[, rBar], 0.95)
 
+
+  ## TODO: not used later, consider deleting
   VVHatCacheBar <- vector("list", nsim)
   UUHatCacheBar <- vector("list", nsim)
   singValsTildeBar <- singValsTilde[1:rBar]
   for (s in 1:nsim) {
     randV <- matrix(rnorm(n * rBar), n, rBar)
-    if (colCent) {
-      randV <- randV - matrix(colMeans(randV), n, rBar, byrow = TRUE)
-    }
+    if (colCent) randV <- MatCenterJP(randV, iColCent = T)
     randV <- qr.Q(qr(randV))
     randU <- matrix(rnorm(d * rBar), d, rBar)
-    if (rowCent) {
-      randU <- randU - matrix(colMeans(randU), d, rBar, byrow = TRUE)
-    }
+    if (rowCent) randU <- MatCenterJP(randU, iRowCent = T)
     randU <- qr.Q(qr(randU))
-    ##########
-    # cat('size of randU')
-    # print(dim(randU))
-    # cat('size of diag(singValsTildeBar')
-    # print(dim(diag(singValsTildeBar)))
-    # cat('size of randV')
-    # print(dim(t(randV)))
-    # cat('size of Ehat')
-    # print(dim(EHat))
-    ###########
     randX <- randU %*% diag(singValsTildeBar) %*% t(randV) + EHat
     svdRand <- RSpectra::svds(randX, rBar)
     randUHat <- svdRand$u
