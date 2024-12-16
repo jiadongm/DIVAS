@@ -2,32 +2,29 @@
 % Please edit documentation in R/DJIVESignalExtractJP.R
 \name{DJIVESignalExtractJP}
 \alias{DJIVESignalExtractJP}
-\title{Signal Matrix Extraction for DJIVE}
+\title{Signal Matrix Extraction for DIVAS}
 \usage{
 DJIVESignalExtractJP(
   datablock,
-  dataname,
-  nsim,
-  iplot,
-  colCent,
-  rowCent,
-  cull,
-  noisepercentile,
+  nsim = 400,
+  iplot = FALSE,
+  colCent = F,
+  rowCent = F,
+  cull = 0.382,
+  noisepercentile = rep(0.5, length(datablock)),
   noiselvls = NULL
 )
 }
 \arguments{
-\item{datablock}{A list of data matrices, each matrix corresponding to a data block.}
-
-\item{dataname}{A character vector of names for each data matrix.}
+\item{datablock}{A list of feature by sample (eg gene by cell) data matrices, each matrix corresponding to a data block. Matrices have to have same number of columns (mathced samples).}
 
 \item{nsim}{An integer specifying the number of bootstrap samples.}
 
-\item{iplot}{A logical (0 or 1) to indicate whether plots should be generated for visualizing singular value shrinkage.}
+\item{iplot}{A logical to indicate whether plots should be generated for visualizing singular value shrinkage.}
 
-\item{colCent}{A logical (0 or 1) indicating whether columns should be centered.}
+\item{colCent}{A logical indicating whether columns should be centered.}
 
-\item{rowCent}{A logical (0 or 1) indicating whether rows should be centered.}
+\item{rowCent}{A logical indicating whether rows should be centered.}
 
 \item{cull}{A numeric value for the culling parameter to adjust signal rank.}
 

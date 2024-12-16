@@ -29,21 +29,12 @@
 #' @importFrom RSpectra svds
 #' @export
 #'
-MatSignalExtractJP <- function(X, matName, nsim, colCent, rowCent, cull, percentile, noiselvl = NULL) {
-  # Matrix signal extraction
-  # Estimate signal rank, signal row space, corresponding perturbation
-  # angle, and noise matrix. Adjust signals based on random direction angle.
-  #
-  # Inputs:
-  #   X - d x n data matrix
-  #   matName - string of matrix name
-  #   nsim - number of bootstrap samples
-  #
-  # Outputs:
-  #   VBar - adjusted signal row spacemi
-  #   phiBar - adjusted perturbation angle
-  #   rBar - adjusted signal rank
-  #   EHat - estimated noise matrix
+MatSignalExtractJP <- function(
+    X, matName = NULL, nsim = 400, colCent = F, rowCent = F,
+    cull = 0.382, percentile = 0.5, noiselvl = NULL
+  ) {
+
+
   if (!is.numeric(X)) {
     stop("The input matrix X is not numeric.")
   }
@@ -59,13 +50,9 @@ MatSignalExtractJP <- function(X, matName, nsim, colCent, rowCent, cull, percent
 
   mindn <- min(d, n)
 
-  #Perform SVD on the data matrix X
-  # svdResult <- svd(X)
-  # UFull <- svdResult$u
-  # singVals <- svdResult$d
-  # VFull <- svdResult$v
+  if(is.null(matName)) matName <- "datablock"
 
-  #need convert list
+  #Perform SVD on the data matrix X
   svdResult <- La.svd(X)
   UFull <- svdResult$u
   singVals <- svdResult$d
@@ -73,20 +60,10 @@ MatSignalExtractJP <- function(X, matName, nsim, colCent, rowCent, cull, percent
   #singVals <- diag(as.vector(singVals))
   VFull <- t(svdResult$vt)
 
-  # cat('size of UFull')
-  # print(dim(UFull))
-  # cat('size of singVals')
-  # print(dim(singVals))
-  # cat('size of VFull')
-  # print(dim(VFull))
-  #
   beta <- min(n/d, d/n)
-  if (is.null(cull)) {
-    cull <- 0.5
-  }
 
 
-  # Check if `noiselvl` is provided
+  # Singlular value shrinkage
   if (is.null(noiselvl)) {
     # If `noiselvl` is not provided, estimate it using optimal shrinkage
     result <- optimal_shrinkage(singVals, beta, 'op', percentile)
@@ -100,14 +77,18 @@ MatSignalExtractJP <- function(X, matName, nsim, colCent, rowCent, cull, percent
     singValsHat <- optimal_shrinkage(singVals, beta, 'op', noiselvl)$singvals
   }
 
+  # Rank estimate
   rHat <- sum(singValsHat > 0)
   cat(sprintf('Initial signal rank for %s is %d.\n', matName, rHat))
 
   recovBound <- noiselvl * (1 + sqrt(beta))
 
-  svdHat <- RSpectra::svds(X, rHat)
-  UHat <- svdHat$u
-  VHat <- svdHat$v
+  # SVD after shrinkage
+  # svdHat <- RSpectra::svds(X, rHat)
+  # UHat <- svdHat$u
+  # VHat <- svdHat$v
+  UHat <- UFull[, 1:rHat, drop=F]
+  VHat <- VFull[, 1:rHat, drop=F]
   singValsTilde <- singValsHat[1:rHat]
   AHat <- UHat %*% diag(singValsTilde) %*% t(VHat)
   EHat <- X - AHat
@@ -142,17 +123,13 @@ MatSignalExtractJP <- function(X, matName, nsim, colCent, rowCent, cull, percent
 
   for (s in 1:nsim) {
     randV <- matrix(rnorm(n * rHat), n, rHat)
-    if (colCent) {
-      randV <- randV - matrix(colMeans(randV), n, rHat, byrow = TRUE)
-    }
+    if(colCent) randV <- MatCenterJP(randV, iColCent = T)
     randV <- qr.Q(qr(randV))
 
     randU <- matrix(rnorm(d * rHat), d, rHat)
 
     #print(dim(randV))
-    if (rowCent) {
-      randU <- randU - matrix(colMeans(randU), d, rHat, byrow = TRUE)
-    }
+    if (rowCent) randU <- MatCenterJP(randU, iRowCent = T)
     randU <- qr.Q(qr(randU))
     randX <- randU %*% diag(singValsTilde) %*% t(randV) + EHatImpute
     svdRand <- RSpectra::svds(randX, rHat)
@@ -193,7 +170,6 @@ MatSignalExtractJP <- function(X, matName, nsim, colCent, rowCent, cull, percent
   # print(randAngle)
   #
   cull <- as.numeric(cull)
-  cull <- matrix(cull, nrow = 1, ncol = 1)
   # cat('cull dimension and cull\n')
   # print(dim(cull))
 

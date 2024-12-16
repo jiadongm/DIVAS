@@ -6,12 +6,12 @@
 \usage{
 MatSignalExtractJP(
   X,
-  matName,
-  nsim,
-  colCent,
-  rowCent,
-  cull,
-  percentile,
+  matName = NULL,
+  nsim = 400,
+  colCent = F,
+  rowCent = F,
+  cull = 0.382,
+  percentile = 0.5,
   noiselvl = NULL
 )
 }

@@ -1,13 +1,12 @@
-#' Signal Matrix Extraction for DJIVE
+#' Signal Matrix Extraction for DIVAS
 #'
 #' Extracts the signal matrix for each data block, estimates signal ranks, and adjusts perturbation angles for each data matrix.
 #'
-#' @param datablock A list of data matrices, each matrix corresponding to a data block.
-#' @param dataname A character vector of names for each data matrix.
+#' @param datablock A list of feature by sample (eg gene by cell) data matrices, each matrix corresponding to a data block. Matrices have to have same number of columns (mathced samples).
 #' @param nsim An integer specifying the number of bootstrap samples.
-#' @param iplot A logical (0 or 1) to indicate whether plots should be generated for visualizing singular value shrinkage.
-#' @param colCent A logical (0 or 1) indicating whether columns should be centered.
-#' @param rowCent A logical (0 or 1) indicating whether rows should be centered.
+#' @param iplot A logical to indicate whether plots should be generated for visualizing singular value shrinkage.
+#' @param colCent A logical indicating whether columns should be centered.
+#' @param rowCent A logical indicating whether rows should be centered.
 #' @param cull A numeric value for the culling parameter to adjust signal rank.
 #' @param noisepercentile A numeric vector specifying the percentiles used for noise estimation for each data block.
 #' @param noiselvls A list specifying noise levels for each data block; if NULL, noise levels are estimated internally.
@@ -28,33 +27,52 @@
 #'   }
 #' @import RSpectra
 #' @export
-DJIVESignalExtractJP <- function(datablock, dataname, nsim, iplot, colCent, rowCent, cull, noisepercentile, noiselvls = NULL) {
+DJIVESignalExtractJP <- function(
+    datablock, nsim = 400,
+    iplot = FALSE, colCent = F, rowCent = F, cull = 0.382,
+    noisepercentile = rep(0.5, length(datablock)), noiselvls = NULL
+){
 
+  # Check input dimensions
+  if(class(datablock) != "list") stop("Input datablock has to be a list with length >= 2.")
+  if(length(datablock) < 2) stop("Input datablock has to be a list with length >= 2.")
+  if(max(sapply(datablock, ncol)) != min(sapply(datablock, ncol))) stop("All data blocks have to have the same number of columns (samples).")
+
+  # Check data block names
   nb <- length(datablock)
-  # library(RSpectra)
+  dataname <- names(datablock)
+  if(is.null(dataname)){
+    warning("Input datablock is unnamed, generic names for data blocks generated.")
+    dataname <- paste0("Datablock", 1:nb)
+  }
+
+  # Check noisepercentile length
+  if(length(noisepercentile) != length(datablock)) stop("Input noisepercentile has to have the same length as datablock (ie number of data blocks).")
 
   # Initialize the output lists
-  VBars <- vector("list", nb)
-  UBars <- vector("list", nb)
-  EHats <- vector("list", nb)
-  phiBars <- rep(90, nb)
-  psiBars <- rep(90, nb)
-  rBars <- numeric(nb)
-  singVals <- vector("list", nb)
-  singValsHat <- vector("list", nb)
-  rSteps <- vector("list", nb)
-  VVHatCacheBars <- vector("list", nb)
-  UUHatCacheBars <- vector("list", nb)
+  VBars <- vector("list", nb) # adjusted signal row spaces
+  UBars <- vector("list", nb) # adjusted signal column spaces
+  EHats <- vector("list", nb) # estimated noise matrices
+  phiBars <- rep(90, nb) # adjusted perturbation angles
+  psiBars <- rep(90, nb) # loadings perturbation angles
+  rBars <- numeric(nb) # adjusted signal ranks
+  singVals <- vector("list", nb) # singular values before shrinkage
+  singValsHat <- vector("list", nb) # singular values after shrinkage
+  rSteps <- vector("list", nb) # signal rank adjustment steps
+  VVHatCacheBars <- vector("list", nb) # cached VVHat matrices for bootstrap samples
+  UUHatCacheBars <- vector("list", nb) # cached UUHat matrices for bootstrap samples
 
   # Loop through each block
   for (ib in 1:nb) {
+
     cat(sprintf('Signal estimation for %s\n', dataname[ib]))
+
     datablockc <- datablock[[ib]]
     d <- nrow(datablockc)
     n <- ncol(datablockc)
     percentile <- noisepercentile[ib]
-    print('datablockc size')
-    print(dim(datablockc))
+    cat('Datablock dimensions:', d, "features;", n, "samples \n")
+
     # Check if noiselvls is provided or not
     if (is.null(noiselvls)) {
       result <- MatSignalExtractJP(datablockc, dataname[ib], nsim, colCent, rowCent, cull, percentile)
@@ -75,8 +93,8 @@ DJIVESignalExtractJP <- function(datablock, dataname, nsim, iplot, colCent, rowC
     UUHatCacheBars[[ib]] <- result$UUHatCacheBar
   }
 
-  # Plotting (if iplot is set to 1)
-  if (iplot == 1) {
+  # Plotting (if iplot is TRUE)
+  if (iplot) {
     for (ib in 1:nb) {
       singValsI <- singVals[[ib]]
       singValsHatI <- singValsHat[[ib]]

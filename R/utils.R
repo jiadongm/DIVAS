@@ -1,3 +1,17 @@
+#' Arccosine in Degrees
+#'
+#' The `acosd` function computes the inverse cosine (arccosine) of a numeric value and converts the result from radians to degrees.
+#'
+#' @param x A numeric value or vector. The input should be within the range [-1, 1], as values outside this range will produce NaN values.
+#'
+#' @return A numeric value or vector representing the arccosine of the input, expressed in degrees.
+#'
+acosd <- function(x) {
+  return(acos(x) * 180 / pi)
+}
+
+
+
 #' Center a Matrix by Rows, Columns, or Both
 #'
 #' This function centers a matrix by subtracting the row means, column means, or both, depending on the specified centering options. It is useful in data preprocessing to normalize data for further analysis.
@@ -9,16 +23,16 @@
 #' @return A centered matrix with the specified adjustments applied. If both `iColCent` and `iRowCent` are `TRUE`, the matrix will be centered by both rows and columns.
 #' @export
 #'
-MatCenterJP <- function(X, iColCent, iRowCent) {
+MatCenterJP <- function(X, iColCent = F, iRowCent = F) {
 
   d <- nrow(X)
   n <- ncol(X)
   outMat <- X
   if (iColCent) {
-    outMat <- outMat - matrix(rowMeans(outMat), nrow = d, ncol = n, byrow = FALSE)
+    outMat <- sweep(outMat, 1, rowMeans(outMat), "-")
   }
   if (iRowCent) {
-    outMat <- outMat - matrix(colMeans(outMat), nrow = d, ncol = n, byrow = TRUE)
+    outMat <- sweep(outMat, 2, colMeans(outMat), "-")
   }
   return(outMat)
 }
