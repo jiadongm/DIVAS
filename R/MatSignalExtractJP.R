@@ -99,7 +99,7 @@ MatSignalExtractJP <- function(
   # Imputation of missing energy
   imputedSingVals <- numeric(rHat)
   for (iter in 1:rHat) {
-    perc <- runif(1)
+    perc <- stats::runif(1)
     marpas <- PercentileMarcenkoPastur(beta, perc)
     imputedSingVals[iter] <- sqrt(marpas)
   }
@@ -108,8 +108,8 @@ MatSignalExtractJP <- function(
 
   randAngleCache <- randDirAngleMJ(n, rHat, 1000)
   randAngleCacheLoad <- randDirAngleMJ(d, rHat, 1000)
-  randAngle <- quantile(randAngleCache, 0.05)
-  randAngleLoad <- quantile(randAngleCacheLoad, 0.05)
+  randAngle <- stats::quantile(randAngleCache, 0.05)
+  randAngleLoad <- stats::quantile(randAngleCacheLoad, 0.05)
 
   rSteps <- rHat
 
@@ -122,11 +122,11 @@ MatSignalExtractJP <- function(
   cat(paste0('\n', strrep('.', nsim), '\n\n'))
 
   for (s in 1:nsim) {
-    randV <- matrix(rnorm(n * rHat), n, rHat)
+    randV <- matrix(stats::rnorm(n * rHat), n, rHat)
     if(colCent) randV <- MatCenterJP(randV, iColCent = T)
     randV <- qr.Q(qr(randV))
 
-    randU <- matrix(rnorm(d * rHat), d, rHat)
+    randU <- matrix(stats::rnorm(d * rHat), d, rHat)
 
     #print(dim(randV))
     if (rowCent) randU <- MatCenterJP(randU, iRowCent = T)
@@ -181,9 +181,9 @@ MatSignalExtractJP <- function(
   #
   # cat('quantile(PCAnglesCacheFullBoot, 0.95, 1)\n')
 
-  rBar_quantiles <- apply(PCAnglesCacheFullBoot, 2, quantile, probs = 0.95)
+  rBar_quantiles <- apply(PCAnglesCacheFullBoot, 2, stats::quantile, probs = 0.95)
   # print(dim(rBar_quantiles))
-  rBarLoad_quantiles <- apply(PCAnglesCacheFullBootLoad, 2, quantile, probs = 0.95)
+  rBarLoad_quantiles <- apply(PCAnglesCacheFullBootLoad, 2, stats::quantile, probs = 0.95)
   rBar <- sum(rBar_quantiles < as.numeric(randAngle * cull))
   #rBar <-3
   rBarLoad <- sum(rBarLoad_quantiles < as.numeric(randAngleLoad * cull))
@@ -196,7 +196,7 @@ MatSignalExtractJP <- function(
   cat(sprintf('Culled Rank is %d.\n', rBar))
 
   # validPC <- quantile(PCAnglesCacheFullBoot, 0.95, 1) < randAngle * cull
-  quantiles_validPC <- apply(PCAnglesCacheFullBoot, 2, quantile, probs = 0.95)
+  quantiles_validPC <- apply(PCAnglesCacheFullBoot, 2, stats::quantile, probs = 0.95)
   validPC <- quantiles_validPC < as.numeric(randAngle * cull)
 
   # cat('quantiles_validPC is ',quantiles_validPC, '\n')
@@ -206,7 +206,7 @@ MatSignalExtractJP <- function(
   #validPC <- quantiles_validPC < randAngle * cull
   #cat('validPC is ',validPC, '\n')
 
-  minInd <- which.min(quantile(PCAnglesCacheFullBoot, 0.95, 1))
+  minInd <- which.min(stats::quantile(PCAnglesCacheFullBoot, 0.95, 1))
   minInd <- as.numeric(minInd)
   # cat("minInd\n")
   # print(as.numeric(minInd))
@@ -214,8 +214,8 @@ MatSignalExtractJP <- function(
 
   validPC[minInd] <- TRUE
   rBar <- sum(validPC)
-  phiBar <- quantile(PCAnglesCacheFullBoot[, rBar], 0.95)
-  psiBar <- quantile(PCAnglesCacheFullBootLoad[, rBar], 0.95)
+  phiBar <- stats::quantile(PCAnglesCacheFullBoot[, rBar], 0.95)
+  psiBar <- stats::quantile(PCAnglesCacheFullBootLoad[, rBar], 0.95)
 
 
   ## TODO: not used later, consider deleting
@@ -223,10 +223,10 @@ MatSignalExtractJP <- function(
   UUHatCacheBar <- vector("list", nsim)
   singValsTildeBar <- singValsTilde[1:rBar]
   for (s in 1:nsim) {
-    randV <- matrix(rnorm(n * rBar), n, rBar)
+    randV <- matrix(stats::rnorm(n * rBar), n, rBar)
     if (colCent) randV <- MatCenterJP(randV, iColCent = T)
     randV <- qr.Q(qr(randV))
-    randU <- matrix(rnorm(d * rBar), d, rBar)
+    randU <- matrix(stats::rnorm(d * rBar), d, rBar)
     if (rowCent) randU <- MatCenterJP(randU, iRowCent = T)
     randU <- qr.Q(qr(randU))
     randX <- randU %*% diag(singValsTildeBar) %*% t(randV) + EHat

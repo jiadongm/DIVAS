@@ -34,7 +34,7 @@ DJIVESignalExtractJP <- function(
 ){
 
   # Check input dimensions
-  if(class(datablock) != "list") stop("Input datablock has to be a list with length >= 2.")
+  if(!methods::is(datablock, "list")) stop("Input datablock has to be a list with length >= 2.")
   if(length(datablock) < 2) stop("Input datablock has to be a list with length >= 2.")
   if(max(sapply(datablock, ncol)) != min(sapply(datablock, ncol))) stop("All data blocks have to have the same number of columns (samples).")
 
@@ -109,13 +109,13 @@ DJIVESignalExtractJP <- function(
 
       plot(1:min(d, n), singValsI, type = "b", col = "blue", pch = 16, ylim = c(0, topPlot), xlab = "Index", ylab = "Singular Value",
            main = paste0(matName, " Singular Value Shrinkage & Culling"))
-      points(1:min(d, n), singValsHatI, type = "b", col = "red", pch = 4)
+      graphics::points(1:min(d, n), singValsHatI, type = "b", col = "red", pch = 4)
       abline(v = rHat, col = "red", lty = 2)
       abline(v = rBar, col = "black", lty = 3)
 
       for (i in 1:length(rStepsI)) {
         redProp <- (length(rStepsI) - i) / (length(rStepsI) - 1)
-        segments(rStepsI[i], botRanges[i], rStepsI[i], topRanges[i], col = rgb(redProp, 0, 0))
+        graphics::segments(rStepsI[i], botRanges[i], rStepsI[i], topRanges[i], col = grDevices::rgb(redProp, 0, 0))
       }
     }
   }

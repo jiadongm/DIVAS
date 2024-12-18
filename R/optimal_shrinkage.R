@@ -25,7 +25,7 @@ incMarPas <- function(x0, beta, gamma) {
     fun <- MarPas
   }
 
-  I <- integrate(fun, x0, topSpec)$value
+  I <- stats::integrate(fun, x0, topSpec)$value
   return(I)
 }
 
@@ -84,7 +84,7 @@ MedianMarcenkoPastur <- function(beta) {
 #'
 #' @return A numeric value representing the estimated optimal noise level (sigma) based on the KS criterion.
 ksOpt <- function(singVals, betaShrinkage) {
-  sigmaMin <- median(singVals) / (1 + sqrt(betaShrinkage))
+  sigmaMin <- stats::median(singVals) / (1 + sqrt(betaShrinkage))
   sigmaMax <- 2 * max(singVals) / (1 + sqrt(betaShrinkage))
   numGrid <- 200
 
@@ -227,7 +227,7 @@ optimal_shrinkage <- function(singvals, beta, loss, percentile, sigma) {
   # warning('off','MATLAB:quadl:MinStepSize')''
   if (missing(sigma) ||is.null(sigma)) {
     MPmedian <- MedianMarcenkoPastur(beta)
-    sigma <- quantile(singvals, probs = percentile) / sqrt(MPmedian)
+    sigma <- stats::quantile(singvals, probs = percentile) / sqrt(MPmedian)
     cat(sprintf("estimated noise = %0.2f \n", sigma))
   }
 
@@ -318,10 +318,6 @@ optimal_shrinkage <- function(singvals, beta, loss, percentile, sigma) {
 #'
 #' @return A numeric value representing the calculated percentile of the Marcenko-Pastur distribution.
 #'
-#' @examples
-#' # Example usage of PercentileMarcenkoPastur function
-#' result <- PercentileMarcenkoPastur(0.5, 0.95)
-#' print(result) # Expected output: A percentile value based on input beta and perc
 #'
 PercentileMarcenkoPastur <- function(beta, perc) {
   nonzeroArea <- 1
@@ -423,7 +419,7 @@ randDirAngleMJ <- function(n, r, nsim) {
   angles <- numeric(nsim)
 
   for (i in 1:nsim) {
-    vec <- rnorm(n)
+    vec <- stats::rnorm(n)
     angles[i] <- acos(sum(vec[1:r]^2)^0.5 / sum(vec^2)^0.5) * 180 / pi
   }
   return(angles)

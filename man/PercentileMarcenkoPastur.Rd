@@ -17,9 +17,3 @@ A numeric value representing the calculated percentile of the Marcenko-Pastur di
 \description{
 This function calculates a specified percentile of the Marcenko-Pastur distribution, which is used in random matrix theory to model the distribution of singular values of large random matrices. It adjusts the percentile calculation based on the shape parameter `beta`.
 }
-\examples{
-# Example usage of PercentileMarcenkoPastur function
-result <- PercentileMarcenkoPastur(0.5, 0.95)
-print(result) # Expected output: A percentile value based on input beta and perc
-
-}
