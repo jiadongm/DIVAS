@@ -200,7 +200,12 @@ BlockJointStrucEstimateJPSignalReduce <- function(
     Vi <- cbind(Vi, opt_v)
   }
 
-  angles <- angles[, 1:ncol(Vi)]
+  if(!is.null(Vi)){
+    angles <- angles[, 1:ncol(Vi), drop=F]
+  } else {
+    angles <- angles[,1,drop=F]
+  }
+
 
   return(list(Vi = Vi, angles = angles))
 }

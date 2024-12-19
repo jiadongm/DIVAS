@@ -11,6 +11,15 @@
 #' @param datablock List of data blocks.
 #' @param iprint Logical. Whether to print results.
 #' @param figdir Directory for saving figures. Set to `NULL` if do not want to save.
+#' @param optArgin A vecotr of exactly 6 optimization tuning parameters (optional). Includes:
+#' \itemize{
+#'   \item \code{tau0}: Initial tuning parameter.
+#'   \item \code{tau_max}: Maximum tuning parameter.
+#'   \item \code{mu}: Step size.
+#'   \item \code{t_max}: Maximum number of iterations.
+#'   \item \code{tol}: Tolerance level for optimization.
+#'   \item \code{delta}: Perturbation parameter.
+#' }
 #'
 #' @return A list containing:
 #' \itemize{
@@ -27,7 +36,7 @@
 #'
 #' @export
 DJIVEJointStrucEstimateJPLoadInfo <- function(
-    VBars, UBars, phiBars, psiBars, rBars, datablock, iprint = FALSE, figdir = ""
+    VBars, UBars, phiBars, psiBars, rBars, datablock, iprint = FALSE, figdir = "", optArgin = NULL
 ) {
 
   # Check input dimensions
@@ -44,8 +53,6 @@ DJIVEJointStrucEstimateJPLoadInfo <- function(
   }
 
   theta0 = 45
-  optArgin = list()
-
 
   allIdx <- 1:nb
 
@@ -74,12 +81,14 @@ DJIVEJointStrucEstimateJPLoadInfo <- function(
       angles <- Vi_angles[[2]]
 
 
-      if (ncol(Vi) > 0) {
-        t <- Idx2numMJ(blockIn)
-        outMap[[as.character(t)]] <- Vi
-        keyIdxMap[[as.character(t)]] <- blockIdx
-        anglesMap[[as.character(t)]] <- angles
-        jointBlockOrder <- c(jointBlockOrder, as.character(t))
+      if(!is.null(Vi)){
+        if (ncol(Vi) > 0) {
+          t <- Idx2numMJ(blockIn)
+          outMap[[as.character(t)]] <- Vi
+          keyIdxMap[[as.character(t)]] <- blockIdx
+          anglesMap[[as.character(t)]] <- angles
+          jointBlockOrder <- c(jointBlockOrder, as.character(t))
+        }
       }
     }
 

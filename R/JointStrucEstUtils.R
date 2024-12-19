@@ -134,9 +134,13 @@ penaltyCCPJPEarlyStopLoadInfo <- function(v0, Qo1, Qo2, Qc1, Qc2, Qc1Load, Qc2Lo
   #   A list with optimized direction vector, cached vectors, objective values, slack variables, and convergence flag
 
   # Set default optimization parameters
-  numvarargs <- length(optArgin)
-  optargs <- list(0.5, 1000, 1.05, 200, 1e-3, 1e-3)
-  optargs[1:numvarargs] <- optArgin
+  if(is.null(optArgin)){
+    optargs <- list(0.5, 1000, 1.05, 200, 1e-3, 1e-3)
+  } else {
+    numvarargs <- length(optArgin)
+    if(numvarargs != 6) stop("Have to specify 6 tuning parameters, ie optArgin has to be a vector of length 6.")
+    optargs[1:numvarargs] <- optArgin
+  }
   tau0 <- optargs[[1]]
   tau_max <- optargs[[2]]
   mu <- optargs[[3]]
@@ -401,7 +405,7 @@ ccpOutVisualMJ <- function(angleHats, phiBars, dataname, iprint = FALSE, figdir 
       # figdir <- path.expand("~/DIVAS_figures")  # default
     }
 
-    # figdir <- gsub("/+$", "", figdir)  # no /
+    figdir <- gsub("//", "/", figdir)
 
     if (!dir.exists(figdir)) {
       figdir <- paste0(getwd(), "/DIVAS_figures")

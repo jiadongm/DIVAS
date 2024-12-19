@@ -12,7 +12,8 @@ DJIVEJointStrucEstimateJPLoadInfo(
   rBars,
   datablock,
   iprint = FALSE,
-  figdir = ""
+  figdir = "",
+  optArgin = NULL
 )
 }
 \arguments{
@@ -31,6 +32,16 @@ DJIVEJointStrucEstimateJPLoadInfo(
 \item{iprint}{Logical. Whether to print results.}
 
 \item{figdir}{Directory for saving figures. Set to `NULL` if do not want to save.}
+
+\item{optArgin}{A vecotr of exactly 6 optimization tuning parameters (optional). Includes:
+\itemize{
+  \item \code{tau0}: Initial tuning parameter.
+  \item \code{tau_max}: Maximum tuning parameter.
+  \item \code{mu}: Step size.
+  \item \code{t_max}: Maximum number of iterations.
+  \item \code{tol}: Tolerance level for optimization.
+  \item \code{delta}: Perturbation parameter.
+}}
 }
 \value{
 A list containing:
