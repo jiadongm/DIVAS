@@ -46,6 +46,9 @@ DJIVESignalExtractJP <- function(
     dataname <- paste0("Datablock", 1:nb)
   }
 
+  print(length(noisepercentile))
+  print(length(datablock))
+
   # Check noisepercentile length
   if(length(noisepercentile) != length(datablock)) stop("Input noisepercentile has to have the same length as datablock (ie number of data blocks).")
 
