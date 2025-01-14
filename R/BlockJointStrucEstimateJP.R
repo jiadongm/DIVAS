@@ -13,8 +13,13 @@ Idx2numMJ <- function(blockIn) {
   return(t)
 }
 
+# Depends on penaltyCCPJPEarlyStop, ccpOutVisualMJ
+# Depends on Idx2numMJ (defined above)
+BlockJointStrucEstimateJP <- function(
+    blockIn, dataname, VBars, phiBars, rBars, curRanks, outMap,
+    theta0 = 45, optArgin = list(), iprint = F, figdir = ""
+) {
 
-BlockJointStrucEstimateJP <- function(blockIn, dataname, VBars, phiBars, rBars, curRanks, outMap, theta0 = 45, optArgin = list(), iprint = 0, figdir = "") {
   nb <- length(blockIn)
   allIdx <- 1:nb
   blockIdx <- allIdx[blockIn]
