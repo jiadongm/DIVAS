@@ -208,7 +208,7 @@ BlockJointStrucEstimateJP <- function(
   #V0 <- svd(Qo2)$v[, 1:max(rBars[blockIn])]
   V0 <- RSpectra::svds(Qo2, k = max(rBars[blockIn]))$v
 
-  Vi <- NULL
+  Vi <- matrix(0, nrow = nrow(V0), ncol = 0)
   #angles <- matrix(90, nrow = nb, ncol = max(ncol(V0), 1))
   angles <- matrix(0, nrow = nb, ncol = ncol(V0))
 
@@ -254,7 +254,11 @@ BlockJointStrucEstimateJP <- function(
     }
   }
 
-  angles <- angles[, 1:(ncol(Vi) + 1 * !any(curRanks + blockIn > rBars))]
+  if(ncol(Vi) == 0){
+    angles <- angles[,1]
+  } else {
+    angles <- angles[, 1:(ncol(Vi) + 1 * !any(curRanks + blockIn > rBars))]
+  }
 
   return(list(Vi = Vi, curRanks = curRanks, angles = angles))
 }
