@@ -22,8 +22,8 @@
 #'
 #' @export
 DJIVEJointStrucEstimateJP <- function(
-    VBars, UBars, phiBars, psiBars, rBars, dataname,
-    theta0 = 45, optArgin = list(), iprint = F, figdir = ""
+    VBars, UBars, phiBars, psiBars, rBars,
+    dataname = NULL, theta0 = 45, optArgin = list(), iprint = F, figdir = ""
   ) {
 
   nb <- length(VBars)
@@ -36,6 +36,11 @@ DJIVEJointStrucEstimateJP <- function(
   jointBlockOrder <- list()
 
   flag <- FALSE
+
+  if(is.null(dataname)){
+    message("Names of data blocks not provided. Will use generic names.\n")
+    dataname <- paste0("Datablock", 1:nb)
+  }
 
   for (len in nb:1) {
 
@@ -61,7 +66,7 @@ DJIVEJointStrucEstimateJP <- function(
    #    print(lenIdces)
    #  }
 
-    lenIdces <- combn(allIdx, len)
+    lenIdces <- utils::combn(allIdx, len)
     nlen <- ncol(lenIdces)
 
     for (i in 1:nlen) {

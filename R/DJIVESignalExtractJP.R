@@ -113,8 +113,8 @@ DJIVESignalExtractJP <- function(
       plot(1:min(d, n), singValsI, type = "b", col = "blue", pch = 16, ylim = c(0, topPlot), xlab = "Index", ylab = "Singular Value",
            main = paste0(matName, " Singular Value Shrinkage & Culling"))
       graphics::points(1:min(d, n), singValsHatI, type = "b", col = "red", pch = 4)
-      abline(v = rHat, col = "red", lty = 2)
-      abline(v = rBar, col = "black", lty = 3)
+      graphics::abline(v = rHat, col = "red", lty = 2)
+      graphics::abline(v = rBar, col = "black", lty = 3)
 
       for (i in 1:length(rStepsI)) {
         redProp <- (length(rStepsI) - i) / (length(rStepsI) - 1)

@@ -1,3 +1,4 @@
+#-----------------------------------------------------------------------------
 Idx2numMJ <- function(blockIn) {
   if (!is.logical(blockIn)) {
     stop("Input must be a logical vector.")
@@ -13,8 +14,107 @@ Idx2numMJ <- function(blockIn) {
   return(t)
 }
 
-# Depends on penaltyCCPJPEarlyStop, ccpOutVisualMJ
-# Depends on Idx2numMJ (defined above)
+
+
+#-----------------------------------------------------------------------------
+projAngleMJ <- function(x, V) {
+  # Project x onto the subspace spanned by V
+  px <- V %*% t(V) %*% x
+
+  # Calculate the angle between the vector x and its projection px
+  angle <- acos(sum(px * x) / (norm(px, type = "2") * norm(x, type = "2"))) * 180 / pi
+
+  return(angle)
+}
+
+ccpOutAnalysisMJ <- function(cache_v, VBars) {
+  # Number of adjusted signal row spaces
+  nb <- length(VBars)
+  # Number of cached optimization vectors
+  T <- length(cache_v)
+  angleHats <- vector("list", nb)
+
+
+  for (ib in 1:nb) {
+    # Initialize angles with -1 for each iteration
+    angles <- rep(-1, T)
+    # Loop over each cached optimization vector
+    for (t in 1:T) {
+      angles[t] <- projAngleMJ(cache_v[[t]], VBars[[ib]])
+    }
+    angleHats[[ib]] <- angles
+  }
+
+  return(angleHats)
+}
+
+
+
+#-----------------------------------------------------------------------------
+ccpOutVisualMJ <- function(angleHats, phiBars, dataname, iprint = NULL, figdir = NULL, figname = NULL) {
+  # Set default figure name if not provided
+  if (is.null(figname) || figname == "") {
+    figname <- "opt_progress"
+  }
+
+  nb <- length(phiBars)
+  T <- length(angleHats[[1]])
+  idx <- 1:T
+
+
+  #par(mfrow = c(1, nb), oma = c(0, 0, 2, 0), mar = c(1, 1, 1, 1))
+  graphics::par(mfrow = c(1, nb), oma = c(0, 0, 1, 0), mar = c(2, 2, 1, 1))
+  for (ib in 1:nb) {
+    # for each data block
+    plot(idx, angleHats[[ib]], type = "l", lwd = 2,
+         xlab = "Index", ylab = "Projected Angle",
+         main = paste0(dataname[[ib]], "\n", figname),
+         xlim = c(1, T), ylim = c(0, max(angleHats[[ib]], phiBars[ib], na.rm = TRUE)))
+
+    # Add a horizontal line for phiBars
+    graphics::abline(h = phiBars[ib], col = "green", lty = 2, lwd = 2)
+
+    graphics::legend("topright", legend = c(paste0("Estimated Angle ", ib), paste0("Perturbation Angle ", ib)),
+           col = c("black", "green"), lty = c(1, 2), lwd = c(2, 2), bty = "n")
+  }
+
+
+  if (!is.null(iprint) && iprint == 1) {
+    # If figdir is not provided or doesn't exist, set it to the current working directory
+    if (is.null(figdir) || !dir.exists(figdir)) {
+      message("No valid figure directory found! Saving to the current folder.")
+      figdir <- getwd()  # Use the current working directory as a fallback
+    }
+
+    savestr <- file.path(figdir, paste0(figname, ".png"))
+
+    tryCatch({
+      grDevices::png(savestr, width = 1500, height = 500)
+
+      graphics::par(mfrow = c(1, nb), oma = c(0, 0, 2, 0), mar = c(1, 1, 1, 1))
+      for (ib in 1:nb) {
+        plot(idx, angleHats[[ib]], type = "l", lwd = 2,
+             xlab = "Index", ylab = "Projected Angle",
+             main = paste0(dataname[[ib]], "\n", figname),
+             xlim = c(1, T), ylim = c(0, max(angleHats[[ib]], phiBars[ib], na.rm = TRUE)))
+        graphics::abline(h = phiBars[ib], col = "green", lty = 2, lwd = 2)
+      }
+      grDevices::dev.off()
+      message("Figure saved successfully in: ", savestr)
+    }, error = function(e) {
+      message("Failed to save figure! Error: ", e)
+    })
+  }
+}
+
+
+
+
+
+### Main function
+#-----------------------------------------------------------------------------
+# Depends on penaltyCCPJPEarlyStop,
+# Depends on ccpOutVisualMJ, Idx2numMJ (defined above)
 BlockJointStrucEstimateJP <- function(
     blockIn, dataname, VBars, phiBars, rBars, curRanks, outMap,
     theta0 = 45, optArgin = list(), iprint = F, figdir = ""
@@ -81,7 +181,7 @@ BlockJointStrucEstimateJP <- function(
   # }
   for (len in nb:(blockLen + 1)) {
     if (len > length(allIdx)) next
-    lenIdces <- combn(allIdx, len)
+    lenIdces <- utils::combn(allIdx, len)
     for (i in 1:ncol(lenIdces)) {
       bkIdx <- lenIdces[, i]
       bkIn <- allIdx %in% bkIdx
@@ -134,7 +234,7 @@ BlockJointStrucEstimateJP <- function(
       if (j > ncol(angles)) {
         angles <- cbind(angles, matrix(90, nrow = nb, ncol = 1))
       }
-      angles[ib, j] <- tail(angleHats[[ib]], 1)
+      angles[ib, j] <- utils::tail(angleHats[[ib]], 1)
     }
 
     if (!converge) {
