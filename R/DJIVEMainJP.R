@@ -2,10 +2,12 @@ DJIVEMainJP <- function(datablock, paramstruct = list(), truth = NULL) {
 
   # Initialize parameters
   nb <- length(datablock)
-  dataname <- vector("list", nb)
-  for (ib in seq_len(nb)) {
-    dataname[[ib]] <- paste0("datablock", ib)
+  dataname <- names(datablock)
+  if(is.null(dataname)){
+    warning("Input datablock is unnamed, generic names for data blocks generated.")
+    dataname <- paste0("Datablock", 1:nb)
   }
+
   nsim <- 400
   theta0 <- 45
   optArgin <- list(0.5, 1000, 1.05, 50, 1e-3, 1e-3)
@@ -77,7 +79,8 @@ DJIVEMainJP <- function(datablock, paramstruct = list(), truth = NULL) {
 
   # Step 2: Estimate joint (and partially joint) structure
   Phase2 <- DJIVEJointStrucEstimateJP(
-    VBars, UBars, phiBars, psiBars, rBars, dataname, theta0, optArgin, iprint, figdir
+    VBars = VBars, UBars = UBars, phiBars =  phiBars,psiBars =  psiBars,
+    rBars = rBars, dataname = dataname, iprint = T, figdir = "~/Desktop"
   )
 
   outMap <- Phase2[[1]]
@@ -85,7 +88,10 @@ DJIVEMainJP <- function(datablock, paramstruct = list(), truth = NULL) {
   jointBlockOrder <- Phase2[[4]]
 
   # Step 3: Reconstruct DJIVE decomposition
-  outstruct <- DJIVEReconstructMJ(datablockc, dataname, outMap, keyIdxMap, jointBlockOrder, 0)
+  outstruct <- DJIVEReconstructMJ(
+    datablock = datablockc,dataname =  dataname,outMap =  outMap,
+    keyIdxMap =  keyIdxMap, jointBlockOrder =  jointBlockOrder, doubleCenter =  0
+  )
 
   outstruct$rBars <- rBars
   outstruct$phiBars <- phiBars

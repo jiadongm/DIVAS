@@ -1,3 +1,11 @@
+takeNormOfEachColumnJP <- function(inmat) {
+  d <- nrow(inmat)
+  sumsqs <- sqrt(colSums(inmat^2))
+  outmat <- inmat / matrix(rep(sumsqs, each = d), nrow = d)
+  return(outmat)
+}
+
+
 #' Calculate Random Direction Angles
 #'
 #' Computes angles between random vectors and their projections onto first r components
@@ -7,7 +15,6 @@
 #' @param nsim Number of simulations to run
 #'
 #' @return Vector of angles in degrees
-#' @export
 randDirAngleMJ <- function(n, r, nsim) {
   angles <- numeric(nsim)
   for (i in 1:nsim) {
