@@ -90,10 +90,10 @@ MatSignalExtractJP <- function(
   UHat <- UFull[, 1:rHat, drop=F]
   VHat <- VFull[, 1:rHat, drop=F]
   singValsTilde <- singValsHat[1:rHat]
-  AHat <- UHat %*% diag(singValsTilde) %*% t(VHat)
+  AHat <- UHat %*% diag(x = singValsTilde, nrow = length(singValsTilde)) %*% t(VHat)
   EHat <- X - AHat
 
-  EHatGood <- UFull[, (rHat+1):mindn] %*% diag(singVals[(rHat+1):mindn]) %*% t(VFull[, (rHat+1):mindn])
+  EHatGood <- UFull[, (rHat+1):mindn] %*% diag(singVals[(rHat+1):mindn], nrow = length(singVals[(rHat+1):mindn])) %*% t(VFull[, (rHat+1):mindn])
   XRemaining <- X - EHatGood
 
   # Imputation of missing energy
@@ -104,7 +104,8 @@ MatSignalExtractJP <- function(
     imputedSingVals[iter] <- sqrt(marpas)
   }
 
-  EHatImpute <- EHatGood + UHat %*% diag(imputedSingVals * noiselvl) %*% t(VHat)
+  inflatedImpSingVals <- imputedSingVals * noiselvl
+  EHatImpute <- EHatGood + UHat %*% diag(inflatedImpSingVals, nrow = length(inflatedImpSingVals)) %*% t(VHat)
 
   randAngleCache <- randDirAngleMJ(n, rHat, 1000)
   randAngleCacheLoad <- randDirAngleMJ(d, rHat, 1000)
@@ -131,7 +132,7 @@ MatSignalExtractJP <- function(
     #print(dim(randV))
     if (rowCent) randU <- MatCenterJP(randU, iRowCent = T)
     randU <- qr.Q(qr(randU))
-    randX <- randU %*% diag(singValsTilde) %*% t(randV) + EHatImpute
+    randX <- randU %*% diag(singValsTilde, nrow = length(singValsTilde)) %*% t(randV) + EHatImpute
     svdRand <- RSpectra::svds(randX, rHat)
     randUHat <- svdRand$u
     randVHat <- svdRand$v
@@ -229,7 +230,7 @@ MatSignalExtractJP <- function(
     randU <- matrix(stats::rnorm(d * rBar), d, rBar)
     if (rowCent) randU <- MatCenterJP(randU, iRowCent = T)
     randU <- qr.Q(qr(randU))
-    randX <- randU %*% diag(singValsTildeBar) %*% t(randV) + EHat
+    randX <- randU %*% diag(singValsTildeBar, nrow = length(singValsTildeBar)) %*% t(randV) + EHat
     svdRand <- RSpectra::svds(randX, rBar)
     randUHat <- svdRand$u
     randVHat <- svdRand$v
