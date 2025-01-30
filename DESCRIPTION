@@ -17,7 +17,6 @@ Depends:
     CVXR
 Imports: 
     RSpectra,
-    pracma,
     methods,
     ggplot2,
     matrixStats,

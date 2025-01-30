@@ -10,7 +10,7 @@
 #' @param theta0 Initial value for angle.
 #' @param optArgin Aditional tuning parameters for optimisation.
 #' @param iprint Print the figures or not.
-#' @param figdir Directory for storing the figures.
+#' @param figdir If not `NULL`, will be parsed as directory for storing the figures.
 #'
 #' @return A list containing:
 #'   \describe{
@@ -23,7 +23,7 @@
 #' @export
 DJIVEJointStrucEstimateJP <- function(
     VBars, UBars, phiBars, psiBars, rBars,
-    dataname = NULL, theta0 = 45, optArgin = list(), iprint = F, figdir = ""
+    dataname = NULL, theta0 = 45, optArgin = list(), iprint = F, figdir = NULL
   ) {
 
   nb <- length(VBars)

@@ -15,7 +15,7 @@ DJIVEJointStrucEstimateJP(
   theta0 = 45,
   optArgin = list(),
   iprint = F,
-  figdir = ""
+  figdir = NULL
 )
 }
 \arguments{
@@ -37,7 +37,7 @@ DJIVEJointStrucEstimateJP(
 
 \item{iprint}{Print the figures or not.}
 
-\item{figdir}{Directory for storing the figures.}
+\item{figdir}{If not `NULL`, will be parsed as directory for storing the figures.}
 }
 \value{
 A list containing:

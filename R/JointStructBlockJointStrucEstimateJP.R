@@ -80,30 +80,52 @@ ccpOutVisualMJ <- function(angleHats, phiBars, dataname, iprint = NULL, figdir =
 
 
   if (!is.null(iprint) && iprint == 1) {
-    # If figdir is not provided or doesn't exist, set it to the current working directory
-    if (is.null(figdir) || !dir.exists(figdir)) {
-      message("No valid figure directory found! Saving to the current folder.")
-      figdir <- getwd()  # Use the current working directory as a fallback
+
+
+    if(!is.null(figdir)){# If figdir is provided
+
+
+      if (!dir.exists(figdir)) {# If figdir doesn't exist, set it to the current working directory
+
+        message("No valid figure directory found! Saving to the current folder.")
+        figdir <- getwd()  # Use the current working directory as a fallback
+      }
+
+      savestr <- file.path(figdir, paste0(figname, ".png"))
+
+      tryCatch({
+        grDevices::png(savestr, width = 1500, height = 500)
+
+        graphics::par(mfrow = c(1, nb), oma = c(0, 0, 2, 0), mar = c(1, 1, 1, 1))
+        for (ib in 1:nb) {
+          plot(idx, angleHats[[ib]], type = "l", lwd = 2,
+               xlab = "Index", ylab = "Projected Angle",
+               main = paste0(dataname[[ib]], "\n", figname),
+               xlim = c(1, T), ylim = c(0, max(angleHats[[ib]], phiBars[ib], na.rm = TRUE)))
+          graphics::abline(h = phiBars[ib], col = "green", lty = 2, lwd = 2)
+        }
+        grDevices::dev.off()
+        message("Figure saved successfully in: ", savestr)
+      }, error = function(e) {
+        message("Failed to save figures! Error: ", e)
+      })
+    } else {# figdir not provided, just print it
+
+      tryCatch({
+        graphics::par(mfrow = c(1, nb), oma = c(0, 0, 2, 0), mar = c(1, 1, 1, 1))
+        for (ib in 1:nb) {
+          plot(idx, angleHats[[ib]], type = "l", lwd = 2,
+               xlab = "Index", ylab = "Projected Angle",
+               main = paste0(dataname[[ib]], "\n", figname),
+               xlim = c(1, T), ylim = c(0, max(angleHats[[ib]], phiBars[ib], na.rm = TRUE)))
+          graphics::abline(h = phiBars[ib], col = "green", lty = 2, lwd = 2)
+        }
+
+      }, error = function(e) {
+        message("Failed to plot figures! Error: ", e)
+      })
     }
 
-    savestr <- file.path(figdir, paste0(figname, ".png"))
-
-    tryCatch({
-      grDevices::png(savestr, width = 1500, height = 500)
-
-      graphics::par(mfrow = c(1, nb), oma = c(0, 0, 2, 0), mar = c(1, 1, 1, 1))
-      for (ib in 1:nb) {
-        plot(idx, angleHats[[ib]], type = "l", lwd = 2,
-             xlab = "Index", ylab = "Projected Angle",
-             main = paste0(dataname[[ib]], "\n", figname),
-             xlim = c(1, T), ylim = c(0, max(angleHats[[ib]], phiBars[ib], na.rm = TRUE)))
-        graphics::abline(h = phiBars[ib], col = "green", lty = 2, lwd = 2)
-      }
-      grDevices::dev.off()
-      message("Figure saved successfully in: ", savestr)
-    }, error = function(e) {
-      message("Failed to save figure! Error: ", e)
-    })
   }
 }
 
@@ -117,7 +139,7 @@ ccpOutVisualMJ <- function(angleHats, phiBars, dataname, iprint = NULL, figdir =
 # Depends on ccpOutVisualMJ, Idx2numMJ (defined above)
 BlockJointStrucEstimateJP <- function(
     blockIn, dataname, VBars, phiBars, rBars, curRanks, outMap,
-    theta0 = 45, optArgin = list(), iprint = F, figdir = ""
+    theta0 = 45, optArgin = list(), iprint = F, figdir = NULL
 ) {
 
   nb <- length(blockIn)
